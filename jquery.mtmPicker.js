@@ -17,7 +17,8 @@
 			delete_widget : false,
 			remove_label : 'Remove',
 			source : null, // must be set at runtime
-			container : null // must be set at runtime
+			container : null, // must be set at runtime
+			callback : null // option to callback after complete
 		};
 
 		var options = $.extend(defaults,options);
@@ -42,9 +43,15 @@
 			$.get(options.source,function(response,status) {
 				if( status === 'success' ) {
 					if( options.delete_widget === false ) {
-						$(response).insertBefore($node);
+						if( typeof(options.callback) === 'function' ) {
+							options.callback($(response).insertBefore($node));
+						}
+						else {
+							$(response).insertBefore($node);
+						}
 					}
 					else if ( options.delete_widget === true ) {
+						var inserted_div = 
 						$('<div/>')
 							.attr('class','mtm' + widget_block_pointer)
 							.append(response)
@@ -56,7 +63,10 @@
 							)
 							.insertBefore($node);
 						// bind anchor to remove function
-						options.container.find('.mtm' + widget_block_pointer + ':last').find('a.delete-mtm').click(remove_mtm_block);
+						$('.mtm' + widget_block_pointer + ':last').find('a.delete-mtm').click(remove_mtm_block);
+						if( typeof(options.callback) === 'function' ) {
+							options.callback(inserted_div);
+						}
 					}
 				}
 			});
